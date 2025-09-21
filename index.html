@@ -1,90 +1,260 @@
 <!DOCTYPE html>
-for(let k in siteContent){
-const el=document.createElement('div');
-el.className='card';
-el.innerHTML=`<b>${k}</b>: ${siteContent[k]}`;
-root.appendChild(el);
-}
-}
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sklep Minecraft</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background:#f9f9f9; }
+  .hidden { display: none; }
+  .card { border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin-bottom: 12px; background:white; }
+  button { padding: 6px 12px; border-radius: 6px; cursor: pointer; border:1px solid #aaa; }
+  input, textarea { width: 100%; padding: 6px; margin: 4px 0; border-radius: 4px; border:1px solid #ccc; }
+  .accent { background: #0b74de; color: #fff; border: none; }
+  img { max-width:120px; display:block; margin-top:6px; }
+  nav { margin-bottom:10px; }
+</style>
+</head>
+<body>
 
+<h1>Sklep Minecraft</h1>
+<button id="btn-admin-open">Panel admin</button>
 
-// --- Tab navigation ---
-document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
-document.querySelectorAll('.tab').forEach(t=>t.classList.add('hidden'));
-document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('accent'));
-document.getElementById('tab-'+b.dataset.tab).classList.remove('hidden');
-b.classList.add('accent');
-}));
+<nav>
+  <button data-tab="shop" class="tab-btn accent">Sklep</button>
+  <button data-tab="orders" class="tab-btn">Zamówienia</button>
+  <button data-tab="content" class="tab-btn">Zawartość</button>
+</nav>
 
+<div id="messages"></div>
 
-// --- Admin ---
-document.getElementById('btn-admin-open').addEventListener('click',()=>{ document.getElementById('admin-modal').classList.toggle('hidden'); });
+<div id="tab-shop" class="tab card">
+  <h2>Produkty</h2>
+  <div id="products-list"></div>
+</div>
 
+<div id="tab-orders" class="tab card hidden">
+  <h2>Zamówienia</h2>
+  <div id="orders-list">Brak zamówień</div>
+</div>
 
-document.getElementById('admin-login-btn').addEventListener('click',()=>{
-const l=document.getElementById('admin-login').value;
-const p=document.getElementById('admin-password').value;
-if(l===ADMIN_LOGIN && p===ADMIN_PASS){ authAdmin=true; document.getElementById('admin-logged-out').classList.add('hidden'); document.getElementById('admin-area').classList.remove('hidden');
-renderAdminProducts(); renderAdminOrders(); renderSiteContent(); showMsg('Zalogowano');
-} else alert('Błędny login lub hasło');
-});
-document.getElementById('admin-logout').addEventListener('click',()=>{ authAdmin=false; document.getElementById('admin-area').classList.add('hidden'); document.getElementById('admin-logged-out').classList.remove('hidden'); showMsg('Wylogowano'); });
+<div id="tab-content" class="tab card hidden">
+  <h2>Zawartość strony</h2>
+  <div id="site-content-list"></div>
+</div>
 
+<!-- Admin modal -->
+<div id="admin-modal" class="card hidden">
+  <h2>Panel administracyjny</h2>
+  <div id="admin-logged-out">
+    <p>Zaloguj się jako admin</p>
+    <input id="admin-login" placeholder="login">
+    <input id="admin-password" type="password" placeholder="hasło">
+    <button id="admin-login-btn" class="accent">Zaloguj</button>
+  </div>
 
-// --- Product actions ---
-document.getElementById('add-prod-btn').addEventListener('click',()=>{
-const title=document.getElementById('prod-title').value;
-const desc=document.getElementById('prod-desc').value;
-const price=document.getElementById('prod-price').value;
-const image=document.getElementById('prod-image').value;
-if(!title||!price){ alert('Tytuł i cena wymagane'); return; }
-products.push({title, desc, price, image});
-renderProducts(); renderAdminProducts();
-document.getElementById('prod-title').value=''; document.getElementById('prod-desc').value=''; document.getElementById('prod-price').value=''; document.getElementById('prod-image').value='';
-});
+  <div id="admin-area" class="hidden">
+    <button id="admin-logout">Wyloguj</button>
+    <section class="card">
+      <h4>Dodaj produkt</h4>
+      <input id="prod-title" placeholder="Tytuł">
+      <textarea id="prod-desc" placeholder="Opis"></textarea>
+      <input id="prod-price" placeholder="Cena">
+      <input id="prod-image" placeholder="URL obrazka">
+      <button id="add-prod-btn" class="accent">Dodaj produkt</button>
+    </section>
 
+    <section class="card">
+      <h4>Produkty (edytuj / usuń)</h4>
+      <div id="admin-products"></div>
+    </section>
 
-function editProd(i){
-const p = products[i];
-const title = prompt('Nowy tytuł', p.title) || p.title;
-const desc = prompt('Nowy opis', p.desc) || p.desc;
-const price = prompt('Nowa cena', p.price) || p.price;
-const image = prompt('Nowy obraz URL', p.image) || p.image;
-products[i] = {title, desc, price, image};
-renderProducts(); renderAdminProducts();
-}
+    <section class="card">
+      <h4>Zamówienia</h4>
+      <div id="admin-orders"></div>
+    </section>
 
+    <section class="card">
+      <h4>Edytuj zawartość strony</h4>
+      <input id="slot-name" placeholder="slot">
+      <textarea id="slot-content" placeholder="HTML/tekst"></textarea>
+      <button id="save-slot-btn">Zapisz zawartość</button>
+    </section>
+  </div>
+</div>
 
-function delProd(i){ if(confirm('Usunąć produkt?')){ products.splice(i,1); renderProducts(); renderAdminProducts(); } }
+<script>
+  // --- Dane lokalne ---
+  let authAdmin = false;
+  let products = [
+    {title:'Miecz', desc:'Legendarny miecz, idealny do PvP', price:50, image:'https://via.placeholder.com/120'},
+    {title:'Zbroja', desc:'Mocna zbroja, chroni przed potworami', price:100, image:'https://via.placeholder.com/120'},
+    {title:'Eliksir zdrowia', desc:'Natychmiast odnawia zdrowie', price:25, image:'https://via.placeholder.com/120'}
+  ];
+  let orders = [];
+  let siteContent = {
+    header_text: 'Witaj w naszym sklepie Minecraft! Kup najlepsze przedmioty dla swojego serwera.',
+    footer_text: 'Kontakt: kowalczykb593@gmail.com'
+  };
 
+  const DEFAULT_EMAIL = 'kowalczykb593@gmail.com';
+  const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1419272611451502744/8ZWhhkXVyhroc7QTRJVjfYsAbfL-y6Uk97d3qGQgIC-OSsnj_TE4ZNF42hsJnso8T6VT';
+  const ADMIN_LOGIN = 'bartlomiejkowal';
+  const ADMIN_PASS = 'ewcia*1988';
 
-// --- Orders ---
-function buy(i){
-const discord = prompt('Twój nick Discord'); if(!discord)return;
-const mc = prompt('Twój nick Minecraft'); if(!mc)return;
-const order = {product: products[i], discord, mc, email: DEFAULT_EMAIL};
-orders.push(order);
-renderAdminOrders();
-showMsg(`Zamówienie przyjęte. Skontaktuj się: ${DEFAULT_EMAIL}`);
-// wysyłka webhook (opcjonalnie)
-fetch(DISCORD_WEBHOOK, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({content:`Nowe zamówienie: ${products[i].title} Discord: ${discord} MC: ${mc}`})});
-}
+  // --- Helper ---
+  function showMsg(msg){
+    const d=document.getElementById('messages');
+    d.innerHTML='<div class="card">'+msg+'</div>';
+    setTimeout(()=>d.innerHTML='',5000);
+  }
 
+  function renderProducts(){
+    const root = document.getElementById('products-list');
+    root.innerHTML='';
+    products.forEach((p,i)=>{
+      const el=document.createElement('div');
+      el.className='card';
+      el.innerHTML=`<h3>${p.title}</h3><p>${p.desc}</p><p>Cena: ${p.price} zł</p><img src='${p.image}'><button onclick='buy(${i})'>Kup</button>`;
+      root.appendChild(el);
+    });
+  }
 
-// --- Site content ---
-document.getElementById('save-slot-btn').addEventListener('click',()=>{
-const slot=document.getElementById('slot-name').value;
-const content=document.getElementById('slot-content').value;
-if(!slot){ alert('Podaj slot'); return; }
-siteContent[slot] = content;
-renderSiteContent();
-});
+  function renderAdminProducts(){
+    const root = document.getElementById('admin-products');
+    root.innerHTML='';
+    products.forEach((p,i)=>{
+      const el=document.createElement('div');
+      el.className='card';
+      el.innerHTML=`<b>${p.title}</b> - ${p.price} zł <button onclick='editProd(${i})'>Edytuj</button> <button onclick='delProd(${i})'>Usuń</button>`;
+      root.appendChild(el);
+    });
+  }
 
+  function renderAdminOrders(){
+    const root = document.getElementById('admin-orders');
+    root.innerHTML='';
+    orders.forEach((o,i)=>{
+      const el=document.createElement('div');
+      el.className='card';
+      el.innerHTML=`#${i+1} Produkt: ${o.product.title} - Discord: ${o.discord} Minecraft: ${o.mc}`;
+      root.appendChild(el);
+    });
+  }
 
-// --- Initial render ---
-renderProducts(); renderAdminProducts(); renderAdminOrders(); renderSiteContent();
+  function renderSiteContent(){
+    const root = document.getElementById('site-content-list');
+    root.innerHTML='';
+    for(let k in siteContent){
+      const el=document.createElement('div');
+      el.className='card';
+      el.innerHTML=`<b>${k}</b>: ${siteContent[k]}`;
+      root.appendChild(el);
+    }
+  }
+
+  // --- Tab navigation ---
+  document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('accent'));
+    document.getElementById('tab-'+b.dataset.tab).classList.remove('hidden');
+    b.classList.add('accent');
+  }));
+
+  // --- Admin ---
+  document.getElementById('btn-admin-open').addEventListener('click',()=>{
+    document.getElementById('admin-modal').classList.toggle('hidden');
+  });
+
+  document.getElementById('admin-login-btn').addEventListener('click',()=>{
+    const l=document.getElementById('admin-login').value;
+    const p=document.getElementById('admin-password').value;
+    if(l===ADMIN_LOGIN && p===ADMIN_PASS){
+      authAdmin=true;
+      document.getElementById('admin-logged-out').classList.add('hidden');
+      document.getElementById('admin-area').classList.remove('hidden');
+      renderAdminProducts();
+      renderAdminOrders();
+      renderSiteContent();
+      showMsg('Zalogowano');
+    } else alert('Błędny login lub hasło');
+  });
+
+  document.getElementById('admin-logout').addEventListener('click',()=>{
+    authAdmin=false;
+    document.getElementById('admin-area').classList.add('hidden');
+    document.getElementById('admin-logged-out').classList.remove('hidden');
+    showMsg('Wylogowano');
+  });
+
+  // --- Product actions ---
+  document.getElementById('add-prod-btn').addEventListener('click',()=>{
+    const title=document.getElementById('prod-title').value;
+    const desc=document.getElementById('prod-desc').value;
+    const price=document.getElementById('prod-price').value;
+    const image=document.getElementById('prod-image').value;
+    if(!title||!price){ alert('Tytuł i cena wymagane'); return; }
+    products.push({title, desc, price, image});
+    renderProducts();
+    renderAdminProducts();
+    document.getElementById('prod-title').value='';
+    document.getElementById('prod-desc').value='';
+    document.getElementById('prod-price').value='';
+    document.getElementById('prod-image').value='';
+  });
+
+  function editProd(i){
+    const p = products[i];
+    const title = prompt('Nowy tytuł', p.title) || p.title;
+    const desc = prompt('Nowy opis', p.desc) || p.desc;
+    const price = prompt('Nowa cena', p.price) || p.price;
+    const image = prompt('Nowy obraz URL', p.image) || p.image;
+    products[i] = {title, desc, price, image};
+    renderProducts();
+    renderAdminProducts();
+  }
+
+  function delProd(i){
+    if(confirm('Usunąć produkt?')){
+      products.splice(i,1);
+      renderProducts();
+      renderAdminProducts();
+    }
+  }
+
+  // --- Orders ---
+  function buy(i){
+    const discord = prompt('Twój nick Discord');
+    if(!discord)return;
+    const mc = prompt('Twój nick Minecraft');
+    if(!mc)return;
+    const order = {product: products[i], discord, mc, email: DEFAULT_EMAIL};
+    orders.push(order);
+    renderAdminOrders();
+    showMsg(`Zamówienie przyjęte. Skontaktuj się: ${DEFAULT_EMAIL}`);
+    // wysyłka webhook
+    fetch(DISCORD_WEBHOOK, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({content:`Nowe zamówienie: ${products[i].title} Discord: ${discord} MC: ${mc}`})
+    });
+  }
+
+  // --- Site content ---
+  document.getElementById('save-slot-btn').addEventListener('click',()=>{
+    const slot=document.getElementById('slot-name').value;
+    const content=document.getElementById('slot-content').value;
+    if(!slot){ alert('Podaj slot'); return; }
+    siteContent[slot] = content;
+    renderSiteContent();
+  });
+
+  // --- Initial render ---
+  renderProducts();
+  renderAdminProducts();
+  renderAdminOrders();
+  renderSiteContent();
 </script>
-
 
 </body>
 </html>
