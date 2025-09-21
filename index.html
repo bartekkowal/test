@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+for(let k in siteContent){
+const el=document.createElement('div');
+el.className='card';
+el.innerHTML=`<b>${k}</b>: ${siteContent[k]}`;
+root.appendChild(el);
+}
+}
+
+
+// --- Tab navigation ---
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+document.querySelectorAll('.tab').forEach(t=>t.classList.add('hidden'));
+document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('accent'));
+document.getElementById('tab-'+b.dataset.tab).classList.remove('hidden');
+b.classList.add('accent');
+}));
+
+
+// --- Admin ---
+document.getElementById('btn-admin-open').addEventListener('click',()=>{ document.getElementById('admin-modal').classList.toggle('hidden'); });
+
+
+document.getElementById('admin-login-btn').addEventListener('click',()=>{
+const l=document.getElementById('admin-login').value;
+const p=document.getElementById('admin-password').value;
+if(l===ADMIN_LOGIN && p===ADMIN_PASS){ authAdmin=true; document.getElementById('admin-logged-out').classList.add('hidden'); document.getElementById('admin-area').classList.remove('hidden');
+renderAdminProducts(); renderAdminOrders(); renderSiteContent(); showMsg('Zalogowano');
+} else alert('Błędny login lub hasło');
+});
+document.getElementById('admin-logout').addEventListener('click',()=>{ authAdmin=false; document.getElementById('admin-area').classList.add('hidden'); document.getElementById('admin-logged-out').classList.remove('hidden'); showMsg('Wylogowano'); });
+
+
+// --- Product actions ---
+document.getElementById('add-prod-btn').addEventListener('click',()=>{
+const title=document.getElementById('prod-title').value;
+const desc=document.getElementById('prod-desc').value;
+const price=document.getElementById('prod-price').value;
+const image=document.getElementById('prod-image').value;
+if(!title||!price){ alert('Tytuł i cena wymagane'); return; }
+products.push({title, desc, price, image});
+renderProducts(); renderAdminProducts();
+document.getElementById('prod-title').value=''; document.getElementById('prod-desc').value=''; document.getElementById('prod-price').value=''; document.getElementById('prod-image').value='';
+});
+
+
+function editProd(i){
+const p = products[i];
+const title = prompt('Nowy tytuł', p.title) || p.title;
+const desc = prompt('Nowy opis', p.desc) || p.desc;
+const price = prompt('Nowa cena', p.price) || p.price;
+const image = prompt('Nowy obraz URL', p.image) || p.image;
+products[i] = {title, desc, price, image};
+renderProducts(); renderAdminProducts();
+}
+
+
+function delProd(i){ if(confirm('Usunąć produkt?')){ products.splice(i,1); renderProducts(); renderAdminProducts(); } }
+
+
+// --- Orders ---
+function buy(i){
+const discord = prompt('Twój nick Discord'); if(!discord)return;
+const mc = prompt('Twój nick Minecraft'); if(!mc)return;
+const order = {product: products[i], discord, mc, email: DEFAULT_EMAIL};
+orders.push(order);
+renderAdminOrders();
+showMsg(`Zamówienie przyjęte. Skontaktuj się: ${DEFAULT_EMAIL}`);
+// wysyłka webhook (opcjonalnie)
+fetch(DISCORD_WEBHOOK, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({content:`Nowe zamówienie: ${products[i].title} Discord: ${discord} MC: ${mc}`})});
+}
+
+
+// --- Site content ---
+document.getElementById('save-slot-btn').addEventListener('click',()=>{
+const slot=document.getElementById('slot-name').value;
+const content=document.getElementById('slot-content').value;
+if(!slot){ alert('Podaj slot'); return; }
+siteContent[slot] = content;
+renderSiteContent();
+});
+
+
+// --- Initial render ---
+renderProducts(); renderAdminProducts(); renderAdminOrders(); renderSiteContent();
+</script>
+
+
+</body>
+</html>
