@@ -1,260 +1,683 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sklep Minecraft</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sklep — Minecraft</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-MK6X0f6jv1x8wQ0kVv+2wHqvPtgF9hbq1kYj3y2mQYk3Qf3V6rS2m0ZQY2QwQw3x6z1x6z1x6z1x6z1x6z1x6w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 <style>
-  body { font-family: Arial, sans-serif; margin: 20px; background:#f9f9f9; }
-  .hidden { display: none; }
-  .card { border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin-bottom: 12px; background:white; }
-  button { padding: 6px 12px; border-radius: 6px; cursor: pointer; border:1px solid #aaa; }
-  input, textarea { width: 100%; padding: 6px; margin: 4px 0; border-radius: 4px; border:1px solid #ccc; }
-  .accent { background: #0b74de; color: #fff; border: none; }
-  img { max-width:120px; display:block; margin-top:6px; }
-  nav { margin-bottom:10px; }
+  :root{
+    --bg1: #0f2027;
+    --bg2: #2c5364;
+    --card: rgba(255,255,255,0.98);
+    --accent: linear-gradient(135deg,#ff7a18 0%,#af002d 50%,#319197 100%);
+    --muted: #6b7280;
+    --glass: rgba(255,255,255,0.06);
+    --radius: 12px;
+    --maxw: 1100px;
+  }
+  html,body{height:100%}
+  body{
+    margin:0;
+    min-height:100%;
+    font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    background: linear-gradient(135deg,#0f2027 0%, #203a43 50%, #2c5364 100%);
+    color:#0f1724;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px;
+  }
+  .wrap{
+    width:100%;
+    max-width:var(--maxw);
+  }
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:18px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:white;
+  }
+  .logo{
+    width:56px;height:56px;border-radius:10px;
+    background:var(--accent); display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.35);
+  }
+  h1{font-size:20px;margin:0;color:white}
+  .subtitle{color:rgba(255,255,255,0.85);font-size:13px;margin-top:2px}
+  .controls{display:flex;gap:10px;align-items:center}
+  .btn{
+    padding:10px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,#ffffff22,#ffffff11);
+    color:white;backdrop-filter: blur(6px); cursor:pointer; display:inline-flex;gap:8px;align-items:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  }
+  .btn.primary{background:var(--accent);font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+  nav{display:flex;gap:8px;margin-bottom:16px}
+  nav .tab{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#e6eef3;cursor:pointer}
+  nav .tab.active{background:rgba(255,255,255,0.06);box-shadow:inset 0 -2px 0 rgba(255,255,255,0.03)}
+  .top-note{color:#e6eef3;margin-bottom:8px;font-size:14px}
+  main{display:grid;grid-template-columns: 1fr 340px; gap:20px;}
+  /* left area */
+  .content{ }
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap:16px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:12px;padding:14px;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.24);
+    transition: transform .18s ease, box-shadow .18s ease;
+    overflow:hidden;
+  }
+  .card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.32); }
+  .product-img{width:100%;height:140px;object-fit:cover;border-radius:8px;border:1px solid #eee}
+  .product-title{font-weight:600;margin:8px 0 6px}
+  .product-desc{color:var(--muted);font-size:13px;margin-bottom:8px}
+  .price{font-weight:700}
+  .actions{display:flex;gap:8px;margin-top:10px}
+  .icon-btn{border-radius:9px;padding:8px 10px;border:0;background:#f3f4f6;cursor:pointer}
+  .icon-btn.secondary{background:#eef2ff}
+  .small{font-size:13px;color:var(--muted)}
+  /* right sidebar */
+  aside{position:relative}
+  .panel{background:rgba(255,255,255,0.04); padding:14px;border-radius:12px;color:white}
+  .panel h3{margin:0 0 8px 0}
+  .muted{color:rgba(255,255,255,0.8);font-size:13px}
+  /* modal admin */
+  .modal-backdrop{position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.6),rgba(2,6,23,0.75));display:flex;align-items:center;justify-content:center;z-index:60}
+  .modal{width:920px;max-width:96%;background:white;border-radius:14px;padding:18px;box-shadow:0 30px 80px rgba(2,6,23,0.6);display:grid;grid-template-columns:1fr 420px;gap:18px}
+  .modal .left{padding-right:6px}
+  .modal h2{margin:0 0 8px}
+  .form-row{margin-bottom:10px}
+  label{display:block;font-size:13px;margin-bottom:6px;color:#111}
+  input[type=text],input[type=password],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef}
+  .admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .users-list,.products-list-admin,.orders-list-admin{max-height:320px;overflow:auto;padding-right:6px}
+  .tiny{font-size:12px;color:#6b7280}
+  .footer-note{font-size:13px;color:#6b7280;margin-top:8px}
+  .flex{display:flex;gap:8px;align-items:center}
+  .badge{display:inline-block;padding:6px 8px;border-radius:8px;background:#eef2ff;color:#2b6cb0;font-weight:600}
+  .export-btn{padding:8px 10px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer}
+  /* responsive */
+  @media (max-width:1000px){
+    main{grid-template-columns:1fr}
+    .modal{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"><i class="fa-solid fa-diamond"></i></div>
+        <div>
+          <h1>Sklep Minecraft</h1>
+          <div class="subtitle">Przedmioty, pakiety i usługi — szybkie zamówienia</div>
+        </div>
+      </div>
 
-<h1>Sklep Minecraft</h1>
-<button id="btn-admin-open">Panel admin</button>
+      <div class="controls">
+        <div class="badge"><i class="fa-solid fa-shield-halved"></i> Bezpieczne</div>
+        <button id="btn-open-admin" class="btn"><i class="fa-solid fa-user-gear"></i> Panel</button>
+        <button id="btn-export" class="btn export-btn"><i class="fa-solid fa-file-export"></i> Eksport</button>
+      </div>
+    </header>
 
-<nav>
-  <button data-tab="shop" class="tab-btn accent">Sklep</button>
-  <button data-tab="orders" class="tab-btn">Zamówienia</button>
-  <button data-tab="content" class="tab-btn">Zawartość</button>
-</nav>
+    <div class="top-note">W sklepie prośby kieruj na e-mail: <strong style="color:#fff">kowalczykb593@gmail.com</strong></div>
 
-<div id="messages"></div>
+    <nav>
+      <button class="tab active" data-tab="shop">Sklep</button>
+      <button class="tab" data-tab="orders">Zamówienia</button>
+      <button class="tab" data-tab="content">Zawartość</button>
+    </nav>
 
-<div id="tab-shop" class="tab card">
-  <h2>Produkty</h2>
-  <div id="products-list"></div>
-</div>
+    <main>
+      <div class="content">
+        <section class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <h3 style="margin:0">Dostępne produkty</h3>
+              <div class="tiny">Wybierz przedmiot, kliknij Kup i wpisz nick Discord + Minecraft</div>
+            </div>
+            <div class="small">Hosting: <strong>GitHub Pages</strong></div>
+          </div>
+          <div style="height:14px"></div>
 
-<div id="tab-orders" class="tab card hidden">
-  <h2>Zamówienia</h2>
-  <div id="orders-list">Brak zamówień</div>
-</div>
+          <div id="productsGrid" class="grid"></div>
+        </section>
+      </div>
 
-<div id="tab-content" class="tab card hidden">
-  <h2>Zawartość strony</h2>
-  <div id="site-content-list"></div>
-</div>
+      <aside>
+        <div class="panel">
+          <h3>Panel</h3>
+          <div class="muted">Szybkie informacje</div>
+          <div style="height:12px"></div>
+          <div class="flex"><i class="fa-solid fa-envelope"></i><div style="margin-left:8px">Kontakt: <strong>kowalczykb593@gmail.com</strong></div></div>
+          <div style="height:10px"></div>
+          <div class="flex"><i class="fa-solid fa-circle-info"></i><div style="margin-left:8px" id="totalProducts">Produkty: 0</div></div>
+          <div style="height:10px"></div>
+          <div class="flex"><i class="fa-solid fa-cart-shopping"></i><div style="margin-left:8px" id="totalOrders">Zamówienia: 0</div></div>
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.06)">
+          <div class="tiny">Zaloguj się do panelu administracyjnego, aby zarządzać sklepem</div>
+        </div>
 
-<!-- Admin modal -->
-<div id="admin-modal" class="card hidden">
-  <h2>Panel administracyjny</h2>
-  <div id="admin-logged-out">
-    <p>Zaloguj się jako admin</p>
-    <input id="admin-login" placeholder="login">
-    <input id="admin-password" type="password" placeholder="hasło">
-    <button id="admin-login-btn" class="accent">Zaloguj</button>
+        <div style="height:12px"></div>
+
+        <div class="panel">
+          <h4>Informacje</h4>
+          <div class="tiny">Użytkownicy i dane są przechowywane lokalnie w przeglądarce (localStorage).</div>
+          <div style="height:10px"></div>
+          <button id="btn-open-help" class="btn"><i class="fa-solid fa-circle-question"></i> Pomoc</button>
+        </div>
+      </aside>
+    </main>
+
+    <!-- modal admin -->
+    <div id="adminModal" class="modal-backdrop hidden">
+      <div class="modal">
+        <div class="left">
+          <h2>Panel administracyjny</h2>
+          <div id="admin-forms">
+            <div id="loginForm">
+              <div class="form-row">
+                <label>Login</label>
+                <input id="adminLogin" type="text" placeholder="login">
+              </div>
+              <div class="form-row">
+                <label>Hasło</label>
+                <input id="adminPass" type="password" placeholder="hasło">
+              </div>
+              <div class="form-row">
+                <button id="btnAdminLogin" class="btn primary"><i class="fa-solid fa-right-to-bracket"></i> Zaloguj</button>
+                <button id="btnAdminClose" class="btn"><i class="fa-solid fa-xmark"></i> Zamknij</button>
+              </div>
+              <div class="tiny">Domyślny admin: <strong>bartlomiejkowal</strong> / <strong>ewcia*1988</strong></div>
+            </div>
+
+            <div id="adminPanel" class="hidden">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <h3 style="margin:0">Zarządzanie</h3>
+                  <div class="tiny">Dodaj produkt, użytkownika, edytuj treść strony</div>
+                </div>
+                <div>
+                  <button id="btnLogoutAdmin" class="btn"><i class="fa-solid fa-right-from-bracket"></i> Wyloguj</button>
+                </div>
+              </div>
+
+              <div style="height:12px"></div>
+
+              <section style="margin-bottom:12px">
+                <h4 style="margin:0 0 8px 0">Dodaj produkt</h4>
+                <div class="form-row"><label>Tytuł</label><input id="prodTitle" type="text"></div>
+                <div class="form-row"><label>Opis</label><textarea id="prodDesc" rows="2"></textarea></div>
+                <div class="form-row"><label>Cena (w zł)</label><input id="prodPrice" type="text"></div>
+                <div class="form-row"><label>URL obrazka</label><input id="prodImage" type="text"></div>
+                <div class="form-row"><button id="btnAddProduct" class="btn primary"><i class="fa-solid fa-plus"></i> Dodaj</button></div>
+              </section>
+
+              <section style="margin-bottom:12px">
+                <h4 style="margin:0 0 8px 0">Produkty</h4>
+                <div class="products-list-admin products-list-admin" id="adminProducts"></div>
+              </section>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="right">
+          <h3>Użytkownicy & zamówienia</h3>
+
+          <div style="height:8px"></div>
+          <div>
+            <h4 style="margin:6px 0">Dodaj użytkownika</h4>
+            <div class="form-row"><input id="newUserLogin" placeholder="login"></div>
+            <div class="form-row"><input id="newUserPass" placeholder="hasło"></div>
+            <div class="form-row"><select id="newUserRole"><option value="user">user</option><option value="admin">admin</option></select></div>
+            <div class="form-row"><button id="btnAddUser" class="btn"><i class="fa-solid fa-user-plus"></i> Dodaj użytkownika</button></div>
+            <div class="form-row tiny">Lista użytkowników (lokalnie)</div>
+            <div class="users-list" id="usersList"></div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div>
+            <h4 style="margin:6px 0">Zamówienia</h4>
+            <div class="orders-list-admin" id="ordersListAdmin"></div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div>
+            <h4 style="margin:6px 0">Treść strony (sloty)</h4>
+            <div class="form-row"><input id="slotKey" placeholder="slot (np. header_text)"></div>
+            <div class="form-row"><textarea id="slotVal" rows="3"></textarea></div>
+            <div class="form-row"><button id="btnSaveSlot" class="btn"><i class="fa-solid fa-floppy-disk"></i> Zapisz slot</button></div>
+            <div class="form-row tiny">Aktualne sloty:</div>
+            <div id="slotList" style="max-height:120px;overflow:auto"></div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div style="display:flex;gap:8px">
+            <button id="btnExport" class="btn"><i class="fa-solid fa-download"></i> Eksportuj JSON</button>
+            <button id="btnImport" class="btn"><i class="fa-solid fa-upload"></i> Importuj JSON</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div style="height:18px"></div>
+    <footer class="tiny" style="color:rgba(255,255,255,0.8)">© Sklep Minecraft — demo. Dane przechowywane lokalnie w przeglądarce.</footer>
   </div>
-
-  <div id="admin-area" class="hidden">
-    <button id="admin-logout">Wyloguj</button>
-    <section class="card">
-      <h4>Dodaj produkt</h4>
-      <input id="prod-title" placeholder="Tytuł">
-      <textarea id="prod-desc" placeholder="Opis"></textarea>
-      <input id="prod-price" placeholder="Cena">
-      <input id="prod-image" placeholder="URL obrazka">
-      <button id="add-prod-btn" class="accent">Dodaj produkt</button>
-    </section>
-
-    <section class="card">
-      <h4>Produkty (edytuj / usuń)</h4>
-      <div id="admin-products"></div>
-    </section>
-
-    <section class="card">
-      <h4>Zamówienia</h4>
-      <div id="admin-orders"></div>
-    </section>
-
-    <section class="card">
-      <h4>Edytuj zawartość strony</h4>
-      <input id="slot-name" placeholder="slot">
-      <textarea id="slot-content" placeholder="HTML/tekst"></textarea>
-      <button id="save-slot-btn">Zapisz zawartość</button>
-    </section>
-  </div>
-</div>
 
 <script>
-  // --- Dane lokalne ---
-  let authAdmin = false;
-  let products = [
-    {title:'Miecz', desc:'Legendarny miecz, idealny do PvP', price:50, image:'https://via.placeholder.com/120'},
-    {title:'Zbroja', desc:'Mocna zbroja, chroni przed potworami', price:100, image:'https://via.placeholder.com/120'},
-    {title:'Eliksir zdrowia', desc:'Natychmiast odnawia zdrowie', price:25, image:'https://via.placeholder.com/120'}
+/* ===================================================================
+   Full frontend-only shop with:
+   - localStorage persistence
+   - users management (passwords hashed using SHA-256)
+   - admin panel (login, add/edit products, add users, save slots)
+   - orders saved locally, Discord webhook POST on purchase
+   - export/import JSON backup
+   =================================================================== */
+
+const DEFAULT_EMAIL = 'kowalczykb593@gmail.com';
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1419272611451502744/8ZWhhkXVyhroc7QTRJVjfYsAbfL-y6Uk97d3qGQgIC-OSsnj_TE4ZNF42hsJnso8T6VT';
+const DEFAULT_ADMIN = { login: 'bartlomiejkowal', pass: 'ewcia*1988' };
+
+// storage keys
+const KEY_PRODUCTS = 'shop_products_v1';
+const KEY_ORDERS = 'shop_orders_v1';
+const KEY_USERS = 'shop_users_v1';
+const KEY_SLOTS = 'shop_slots_v1';
+const KEY_SESSION = 'shop_session_v1';
+
+// utilities
+function $(id){ return document.getElementById(id); }
+function uid(prefix='id'){ return prefix + '-' + Math.random().toString(36).slice(2,9); }
+function now(){ return new Date().toISOString(); }
+function toNumberSafe(v){ const n = parseFloat(v); return isNaN(n)?0:n; }
+
+async function sha256(str){
+  const enc = new TextEncoder();
+  const data = enc.encode(str);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ---------------- persistence ---------------- */
+function loadProducts(){ try{ const raw = localStorage.getItem(KEY_PRODUCTS); return raw ? JSON.parse(raw) : defaultProducts(); }catch(e){ return defaultProducts(); } }
+function saveProducts(arr){ localStorage.setItem(KEY_PRODUCTS, JSON.stringify(arr)); renderProducts(); updateCounts(); }
+function loadOrders(){ try{ const raw = localStorage.getItem(KEY_ORDERS); return raw ? JSON.parse(raw) : []; }catch(e){ return []; } }
+function saveOrders(arr){ localStorage.setItem(KEY_ORDERS, JSON.stringify(arr)); renderOrders(); updateCounts(); }
+function loadUsers(){ try{ const raw = localStorage.getItem(KEY_USERS); return raw ? JSON.parse(raw) : defaultUsers(); }catch(e){ return defaultUsers(); } }
+function saveUsers(arr){ localStorage.setItem(KEY_USERS, JSON.stringify(arr)); renderUsersList(); }
+function loadSlots(){ try{ const raw = localStorage.getItem(KEY_SLOTS); return raw ? JSON.parse(raw) : defaultSlots(); }catch(e){ return defaultSlots(); } }
+function saveSlots(obj){ localStorage.setItem(KEY_SLOTS, JSON.stringify(obj)); renderSlots(); }
+
+/* ---------------- default data ---------------- */
+function defaultProducts(){
+  return [
+    { id: uid('p'), title:'Miecz Smoka', desc:'Legendarny miecz o zwiększonym obrażeniu', price:50, image:'https://images.unsplash.com/photo-1610478146845-5f6f2b6a6d4a?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=4e9b2c6a' },
+    { id: uid('p'), title:'Zbroja Obrońcy', desc:'Zestaw pancerza o wysokiej wytrzymałości', price:120, image:'https://images.unsplash.com/photo-1558980664-10e71708f2a7?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=7f7a9a59' },
+    { id: uid('p'), title:'Eliksir Zdrowia', desc:'Przywraca 100 HP natychmiast', price:25, image:'https://images.unsplash.com/photo-1616575998830-3b6b8c6c4b6a?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=8df1bf2a' }
   ];
-  let orders = [];
-  let siteContent = {
-    header_text: 'Witaj w naszym sklepie Minecraft! Kup najlepsze przedmioty dla swojego serwera.',
-    footer_text: 'Kontakt: kowalczykb593@gmail.com'
+}
+function defaultSlots(){
+  return {
+    header_text: 'Witaj w naszym sklepie Minecraft — najlepsze przedmioty dla Twojego serwera.',
+    footer_text: 'Kontakt: ' + DEFAULT_EMAIL
   };
+}
+function defaultUsers(){
+  // create admin (hashed) — we will compute hash on first run
+  // placeholder; we'll ensure admin exists at init
+  return [];
+}
 
-  const DEFAULT_EMAIL = 'kowalczykb593@gmail.com';
-  const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1419272611451502744/8ZWhhkXVyhroc7QTRJVjfYsAbfL-y6Uk97d3qGQgIC-OSsnj_TE4ZNF42hsJnso8T6VT';
-  const ADMIN_LOGIN = 'bartlomiejkowal';
-  const ADMIN_PASS = 'ewcia*1988';
+/* ---------------- state ---------------- */
+let products = loadProducts();
+let orders = loadOrders();
+let users = loadUsers();
+let slots = loadSlots();
+let session = JSON.parse(localStorage.getItem(KEY_SESSION) || 'null');
 
-  // --- Helper ---
-  function showMsg(msg){
-    const d=document.getElementById('messages');
-    d.innerHTML='<div class="card">'+msg+'</div>';
-    setTimeout(()=>d.innerHTML='',5000);
-  }
+/* ---------------- renderers ---------------- */
+function updateCounts(){
+  $('totalProducts').textContent = 'Produkty: ' + (products.length || 0);
+  $('totalOrders').textContent = 'Zamówienia: ' + (orders.length || 0);
+}
 
-  function renderProducts(){
-    const root = document.getElementById('products-list');
-    root.innerHTML='';
-    products.forEach((p,i)=>{
-      const el=document.createElement('div');
-      el.className='card';
-      el.innerHTML=`<h3>${p.title}</h3><p>${p.desc}</p><p>Cena: ${p.price} zł</p><img src='${p.image}'><button onclick='buy(${i})'>Kup</button>`;
-      root.appendChild(el);
+function renderProducts(){
+  const root = $('productsGrid');
+  root.innerHTML = '';
+  products.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img class="product-img" src="${p.image || placeholderImage()}" alt="${escapeHtml(p.title)}">
+      <div style="height:8px"></div>
+      <div class="product-title">${escapeHtml(p.title)}</div>
+      <div class="product-desc">${escapeHtml(p.desc || '')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div class="price">${(Number(p.price) || 0).toFixed(2)} zł</div>
+        <div class="actions">
+          <button class="btn" onclick="onBuy('${p.id}')"><i class="fa-solid fa-cart-shopping"></i> Kup</button>
+          ${isAdminSession() ? `<button class="btn" onclick="onEditProduct('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn" onclick="onDeleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+        </div>
+      </div>`;
+    root.appendChild(card);
+  });
+  updateCounts();
+}
+
+function renderOrders(){
+  // orders list on "orders" tab
+  const list = $('ordersListAdmin');
+  const ordersListView = $('orders-list');
+  if(list){
+    list.innerHTML = '';
+    orders.forEach((o, i) => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `<b>#${i+1}</b> ${escapeHtml(o.product.title)} — ${escapeHtml(o.product.desc||'')}<div class="tiny">Discord: ${escapeHtml(o.discord)} | Minecraft: ${escapeHtml(o.mc)} | ${escapeHtml(o.ts)}</div>`;
+      list.appendChild(el);
     });
   }
-
-  function renderAdminProducts(){
-    const root = document.getElementById('admin-products');
-    root.innerHTML='';
-    products.forEach((p,i)=>{
-      const el=document.createElement('div');
-      el.className='card';
-      el.innerHTML=`<b>${p.title}</b> - ${p.price} zł <button onclick='editProd(${i})'>Edytuj</button> <button onclick='delProd(${i})'>Usuń</button>`;
-      root.appendChild(el);
-    });
-  }
-
-  function renderAdminOrders(){
-    const root = document.getElementById('admin-orders');
-    root.innerHTML='';
-    orders.forEach((o,i)=>{
-      const el=document.createElement('div');
-      el.className='card';
-      el.innerHTML=`#${i+1} Produkt: ${o.product.title} - Discord: ${o.discord} Minecraft: ${o.mc}`;
-      root.appendChild(el);
-    });
-  }
-
-  function renderSiteContent(){
-    const root = document.getElementById('site-content-list');
-    root.innerHTML='';
-    for(let k in siteContent){
-      const el=document.createElement('div');
-      el.className='card';
-      el.innerHTML=`<b>${k}</b>: ${siteContent[k]}`;
-      root.appendChild(el);
+  if(ordersListView){
+    ordersListView.innerHTML = '';
+    if(orders.length === 0) ordersListView.textContent = 'Brak zamówień';
+    else{
+      orders.forEach((o, i) => {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `<b>#${i+1}</b> ${escapeHtml(o.product.title)} — <div class="tiny">Discord: ${escapeHtml(o.discord)} | MC: ${escapeHtml(o.mc)} | ${escapeHtml(o.ts)}</div>`;
+        ordersListView.appendChild(el);
+      });
     }
   }
+  updateCounts();
+}
 
-  // --- Tab navigation ---
-  document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('accent'));
-    document.getElementById('tab-'+b.dataset.tab).classList.remove('hidden');
-    b.classList.add('accent');
-  }));
-
-  // --- Admin ---
-  document.getElementById('btn-admin-open').addEventListener('click',()=>{
-    document.getElementById('admin-modal').classList.toggle('hidden');
+function renderAdminProducts(){
+  const root = $('adminProducts');
+  if(!root) return;
+  root.innerHTML = '';
+  products.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.style.display = 'flex';
+    el.style.justifyContent = 'space-between';
+    el.style.alignItems = 'center';
+    el.innerHTML = `<div><b>${escapeHtml(p.title)}</b><div class="tiny">${(Number(p.price)||0).toFixed(2)} zł</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="onEditProduct('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn" onclick="onDeleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+      </div>`;
+    root.appendChild(el);
   });
+}
 
-  document.getElementById('admin-login-btn').addEventListener('click',()=>{
-    const l=document.getElementById('admin-login').value;
-    const p=document.getElementById('admin-password').value;
-    if(l===ADMIN_LOGIN && p===ADMIN_PASS){
-      authAdmin=true;
-      document.getElementById('admin-logged-out').classList.add('hidden');
-      document.getElementById('admin-area').classList.remove('hidden');
-      renderAdminProducts();
-      renderAdminOrders();
-      renderSiteContent();
-      showMsg('Zalogowano');
-    } else alert('Błędny login lub hasło');
+function renderUsersList(){
+  const root = $('usersList');
+  if(!root) return;
+  root.innerHTML = '';
+  users.forEach(u => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.style.display='flex'; el.style.justifyContent='space-between'; el.style.alignItems='center';
+    el.innerHTML = `<div><b>${escapeHtml(u.login)}</b> <div class="tiny">${escapeHtml(u.role)}</div></div>
+      <div style="display:flex;gap:8px">
+        ${u.role !== 'admin' ? `<button class="btn" onclick="promoteUser('${u.login}')"><i class="fa-solid fa-arrow-up"></i></button>` : `<button class="btn" onclick="demoteUser('${u.login}')"><i class="fa-solid fa-arrow-down"></i></button>`}
+        <button class="btn" onclick="removeUser('${u.login}')"><i class="fa-solid fa-trash"></i></button>
+      </div>`;
+    root.appendChild(el);
   });
+}
 
-  document.getElementById('admin-logout').addEventListener('click',()=>{
-    authAdmin=false;
-    document.getElementById('admin-area').classList.add('hidden');
-    document.getElementById('admin-logged-out').classList.remove('hidden');
-    showMsg('Wylogowano');
-  });
-
-  // --- Product actions ---
-  document.getElementById('add-prod-btn').addEventListener('click',()=>{
-    const title=document.getElementById('prod-title').value;
-    const desc=document.getElementById('prod-desc').value;
-    const price=document.getElementById('prod-price').value;
-    const image=document.getElementById('prod-image').value;
-    if(!title||!price){ alert('Tytuł i cena wymagane'); return; }
-    products.push({title, desc, price, image});
-    renderProducts();
-    renderAdminProducts();
-    document.getElementById('prod-title').value='';
-    document.getElementById('prod-desc').value='';
-    document.getElementById('prod-price').value='';
-    document.getElementById('prod-image').value='';
-  });
-
-  function editProd(i){
-    const p = products[i];
-    const title = prompt('Nowy tytuł', p.title) || p.title;
-    const desc = prompt('Nowy opis', p.desc) || p.desc;
-    const price = prompt('Nowa cena', p.price) || p.price;
-    const image = prompt('Nowy obraz URL', p.image) || p.image;
-    products[i] = {title, desc, price, image};
-    renderProducts();
-    renderAdminProducts();
+function renderSlots(){
+  const root = $('slotList');
+  if(!root) return;
+  root.innerHTML = '';
+  for(const k of Object.keys(slots)){
+    const el = document.createElement('div'); el.className='card'; el.style.padding='8px';
+    el.innerHTML = `<b>${escapeHtml(k)}</b><div class="tiny">${escapeHtml(String(slots[k]))}</div>`;
+    root.appendChild(el);
   }
+}
 
-  function delProd(i){
-    if(confirm('Usunąć produkt?')){
-      products.splice(i,1);
-      renderProducts();
-      renderAdminProducts();
-    }
+/* ---------------- helpers ---------------- */
+function placeholderImage(){
+  return 'https://via.placeholder.com/600x400?text=Item';
+}
+function escapeHtml(s){
+  if(!s) return '';
+  return String(s).replace(/[&<>"']/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]);
+}
+function isAdminSession(){
+  return session && session.role === 'admin';
+}
+
+/* ---------------- init default admin user if missing ---------------- */
+async function ensureDefaultAdmin(){
+  if(!users || users.length === 0){
+    users = [];
   }
-
-  // --- Orders ---
-  function buy(i){
-    const discord = prompt('Twój nick Discord');
-    if(!discord)return;
-    const mc = prompt('Twój nick Minecraft');
-    if(!mc)return;
-    const order = {product: products[i], discord, mc, email: DEFAULT_EMAIL};
-    orders.push(order);
-    renderAdminOrders();
-    showMsg(`Zamówienie przyjęte. Skontaktuj się: ${DEFAULT_EMAIL}`);
-    // wysyłka webhook
-    fetch(DISCORD_WEBHOOK, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({content:`Nowe zamówienie: ${products[i].title} Discord: ${discord} MC: ${mc}`})
-    });
+  const exists = users.find(u=>u.login === DEFAULT_ADMIN.login);
+  if(!exists){
+    const hash = await sha256(DEFAULT_ADMIN.pass);
+    users.push({ login: DEFAULT_ADMIN.login, pass_hash: hash, role: 'admin' });
+    saveUsers(users);
   }
+}
+ensureDefaultAdmin().then(()=>{ renderUsersList(); });
 
-  // --- Site content ---
-  document.getElementById('save-slot-btn').addEventListener('click',()=>{
-    const slot=document.getElementById('slot-name').value;
-    const content=document.getElementById('slot-content').value;
-    if(!slot){ alert('Podaj slot'); return; }
-    siteContent[slot] = content;
-    renderSiteContent();
-  });
+/* ---------------- actions: buy flow ---------------- */
+async function onBuy(productId){
+  const p = products.find(x=>x.id === productId);
+  if(!p) return alert('Produkt nie znaleziony');
+  let discord = prompt('Wpisz nick z Discorda (np. nick#1234)');
+  if(!discord) return;
+  let mc = prompt('Wpisz nick z Minecrafta');
+  if(!mc) return;
+  const email = DEFAULT_EMAIL;
+  const order = { id: uid('o'), product: p, discord, mc, email, ts: now() };
+  orders.unshift(order);
+  saveOrders(orders);
+  // notify discord webhook (fire-and-forget)
+  try{
+    await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content: `🛒 Nowe zamówienie\nProdukt: ${p.title}\nCena: ${(Number(p.price)||0).toFixed(2)} zł\nDiscord: ${discord}\nMinecraft: ${mc}\nKontakt: ${email}` }) });
+  }catch(e){
+    console.warn('Webhook send failed', e);
+  }
+  alert(`Zamówienie utworzone. Aby dokończyć, skontaktuj się pod adresem: ${email}`);
+  renderOrders();
+}
 
-  // --- Initial render ---
-  renderProducts();
+/* ---------------- admin product management ---------------- */
+$('btnAddProduct').addEventListener('click', ()=>{
+  const title = $('prodTitle').value.trim();
+  const desc = $('prodDesc').value.trim();
+  const price = toNumberSafe($('prodPrice').value);
+  const image = $('prodImage').value.trim() || placeholderImage();
+  if(!title || price <= 0){ alert('Podaj tytuł i poprawną cenę'); return; }
+  const p = { id: uid('p'), title, desc, price, image };
+  products.unshift(p);
+  saveProducts(products);
   renderAdminProducts();
-  renderAdminOrders();
-  renderSiteContent();
-</script>
+  $('prodTitle').value='';$('prodDesc').value='';$('prodPrice').value='';$('prodImage').value='';
+  showToast('Dodano produkt');
+});
 
+function onEditProduct(productId){
+  const p = products.find(x=>x.id === productId);
+  if(!p) return alert('Nie znaleziono produktu');
+  const title = prompt('Tytuł', p.title) || p.title;
+  const desc = prompt('Opis', p.desc) || p.desc;
+  const price = prompt('Cena (w zł)', p.price) || p.price;
+  const image = prompt('URL obrazka', p.image) || p.image;
+  p.title = title; p.desc = desc; p.price = toNumberSafe(price); p.image = image;
+  saveProducts(products);
+  renderAdminProducts();
+  showToast('Zaktualizowano produkt');
+}
+
+function onDeleteProduct(productId){
+  if(!confirm('Usunąć produkt?')) return;
+  products = products.filter(x=>x.id !== productId);
+  saveProducts(products);
+  renderAdminProducts();
+  showToast('Usunięto produkt');
+}
+
+/* ---------------- admin users management ---------------- */
+$('btnAddUser').addEventListener('click', async ()=>{
+  const login = $('newUserLogin').value.trim();
+  const pass = $('newUserPass').value;
+  const role = $('newUserRole').value;
+  if(!login || !pass) return alert('Podaj login i hasło');
+  if(users.find(u=>u.login === login)) return alert('Użytkownik o takim loginie już istnieje');
+  const hash = await sha256(pass);
+  users.push({ login, pass_hash: hash, role });
+  saveUsers(users);
+  $('newUserLogin').value='';$('newUserPass').value='';
+  showToast('Użytkownik dodany');
+});
+
+function promoteUser(login){
+  const u = users.find(x=>x.login===login); if(!u) return;
+  u.role = 'admin'; saveUsers(users); showToast('Użytkownik awansowany na admina');
+}
+function demoteUser(login){
+  const u = users.find(x=>x.login===login); if(!u) return;
+  u.role = 'user'; saveUsers(users); showToast('Użytkownik zdegradowany');
+}
+function removeUser(login){
+  if(!confirm('Usunąć użytkownika?')) return;
+  users = users.filter(x=>x.login !== login); saveUsers(users); showToast('Usunięto użytkownika');
+}
+
+/* ---------------- admin login/logout ---------------- */
+$('btnAdminLogin').addEventListener('click', async ()=>{
+  const login = $('adminLogin').value.trim();
+  const pass = $('adminPass').value;
+  if(!login || !pass) return alert('Wypełnij pola');
+  const hash = await sha256(pass);
+  const u = users.find(x=>x.login === login && x.pass_hash === hash);
+  if(!u) return alert('Błędny login lub hasło');
+  session = { login: u.login, role: u.role, ts: now() };
+  localStorage.setItem(KEY_SESSION, JSON.stringify(session));
+  onAdminLoggedIn();
+});
+
+function onAdminLoggedIn(){
+  $('loginForm').classList.add('hidden');
+  $('adminPanel').classList.remove('hidden');
+  renderAdminProducts();
+  renderUsersList();
+  renderOrders();
+  renderSlots();
+  showToast('Zalogowano jako ' + (session && session.login));
+  updateCounts();
+}
+
+$('btnLogoutAdmin').addEventListener('click', ()=>{
+  session = null; localStorage.removeItem(KEY_SESSION);
+  $('loginForm').classList.remove('hidden');
+  $('adminPanel').classList.add('hidden');
+  showToast('Wylogowano');
+});
+
+/* ---------------- slots management ---------------- */
+$('btnSaveSlot').addEventListener('click', ()=>{
+  const key = $('slotKey').value.trim();
+  const val = $('slotVal').value;
+  if(!key) return alert('Podaj nazwę slotu');
+  slots[key] = val;
+  saveSlots(slots);
+  $('slotKey').value=''; $('slotVal').value='';
+  showToast('Zapisano slot');
+});
+
+/* ---------------- export / import ---------------- */
+$('btnExport').addEventListener('click', ()=>{
+  const data = { products, orders, users, slots };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'shop-backup.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+$('btnImport').addEventListener('click', ()=>{
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  inp.onchange = async (e) => {
+    const f = e.target.files[0];
+    if(!f) return;
+    const txt = await f.text();
+    try{
+      const obj = JSON.parse(txt);
+      if(Array.isArray(obj.products)) products = obj.products;
+      if(Array.isArray(obj.orders)) orders = obj.orders;
+      if(Array.isArray(obj.users)) users = obj.users;
+      if(obj.slots) slots = obj.slots;
+      saveProducts(products); saveOrders(orders); saveUsers(users); saveSlots(slots);
+      showToast('Import zakończony');
+    }catch(err){ alert('Plik nieprawidłowy'); }
+  };
+  inp.click();
+});
+
+/* ---------------- small helpers & UI ---------------- */
+function showToast(msg){
+  const box = document.createElement('div'); box.className='card'; box.style.position='fixed'; box.style.right='20px'; box.style.bottom='20px';
+  box.style.zIndex = 120; box.textContent = msg;
+  document.body.appendChild(box);
+  setTimeout(()=>{ box.style.transition='opacity .4s'; box.style.opacity='0'; setTimeout(()=>box.remove(),400); }, 2200);
+}
+
+/* ---------------- modal open/close etc ---------------- */
+$('btn-open-admin').addEventListener('click', ()=>{ $('adminModal').classList.remove('hidden'); if(session && session.role){ onAdminLoggedIn(); } else { $('loginForm').classList.remove('hidden'); $('adminPanel').classList.add('hidden'); } });
+$('btnAdminClose').addEventListener('click', ()=>{ $('adminModal').classList.add('hidden'); });
+$('btn-open-help').addEventListener('click', ()=>{ alert('Aby kupić: wybierz produkt → Kup → wpisz nick Discord i nick Minecraft. Po zamówieniu wyślij email na ' + DEFAULT_EMAIL); });
+
+/* update renderers on load */
+function renderOrders(){ renderOrders } // placeholder to avoid eslint warnings
+// initial render
+(function init(){
+  // Ensure default admin exists (create hashed admin if not in users)
+  (async ()=>{
+    const adminPresent = users.some(u=>u.login === DEFAULT_ADMIN.login);
+    if(!adminPresent){
+      const hash = await sha256(DEFAULT_ADMIN.pass);
+      users.push({ login: DEFAULT_ADMIN.login, pass_hash: hash, role: 'admin' });
+      saveUsers(users);
+    }
+    renderProducts();
+    renderAdminProducts();
+    renderOrders();
+    renderUsersList();
+    renderSlots();
+    updateCounts();
+    // if session exists and valid, auto-login to admin view
+    if(session && users.some(u=>u.login === session.login && u.role === session.role)) onAdminLoggedIn();
+  })();
+})();
+
+</script>
 </body>
 </html>
